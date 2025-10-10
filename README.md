@@ -1,6 +1,6 @@
-# BUT3_QUAL_DEV_Groupe1
+# BUT3_QUAL_DEV_Groupe14
 
-# ASBank2023 - Application Bancaire IUT
+# ASBank2025 - Application Bancaire IUT
 
 [![Java](https://img.shields.io/badge/Java-11+-blue.svg)](https://www.java.com)
 [![IntelliJ IDEA](https://img.shields.io/badge/IDE-IntelliJ%20IDEA-orange.svg)](https://www.jetbrains.com/idea/)
@@ -60,7 +60,7 @@ Cette application web permet la gestion complète des opérations bancaires avec
 # Fichier : Code source.rar (Section 2)
 ```
 
-Ouvrez le projet dans IntelliJ en sélectionnant le dossier `_00_ASBank2023`
+Ouvrez le projet dans IntelliJ en sélectionnant le dossier `_00_ASBank2025`
 
 ### 3️⃣ Installation d'Apache Tomcat
 
@@ -94,8 +94,8 @@ Ouvrez le projet dans IntelliJ en sélectionnant le dossier `_00_ASBank2023`
 3. Créez la base de données :
 
 ```sql
-CREATE DATABASE Banque2023;
-USE Banque2023;
+CREATE DATABASE Banque2025;
+USE Banque2025;
 ```
 
 4. Importez le script d'initialisation :
@@ -109,7 +109,7 @@ USE Banque2023;
 
 ```xml
 <bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
-    <property name="url" value="jdbc:mysql://localhost:3306/Banque2023"/>
+    <property name="url" value="jdbc:mysql://localhost:3306/Banque2025"/>
     <property name="username" value="root"/>
     <property name="password" value="[votre_mot_de_passe]"/>
 </bean>
@@ -123,7 +123,7 @@ USE Banque2023;
 
 1. Cliquez sur **Run** dans IntelliJ
 2. Sélectionnez votre configuration Tomcat
-3. L'application sera accessible à : `http://localhost:8080/_00_ASBank2023`
+3. L'application sera accessible à : `http://localhost:8080/_00_ASBank2025`
 
 ### Tests unitaires
 
@@ -140,7 +140,7 @@ Pour exécuter les tests :
 ## 📁 Structure du projet
 
 ```
-_00_ASBank2023/
+_00_ASBank2025/
 ├── 📁 .idea/                 # Configuration IntelliJ
 ├── 📁 Documentation/         # Documentation technique
 │   └── Documentation Technique d'Installation - ASBank2025.pdf
@@ -172,6 +172,23 @@ _00_ASBank2023/
 
 ```
 
+## 🔐 Gestion sécurisée des mots de passe
+
+Depuis la version **ASBank 2025**, l’application gère désormais les **mots de passe utilisateurs de manière sécurisée** grâce à un **hachage unidirectionnel SHA-256**.
+
+### ⚙️ Principe
+Lors de la création d’un nouvel utilisateur (`CreerUtilisateur`), le mot de passe saisi est :
+1. Haché côté serveur via la classe `PasswordHasher`
+2. Converti en chaîne hexadécimale de 64 caractères
+3. Stocké en base dans la colonne `userPwd` sans jamais conserver le mot de passe en clair
+
+### 💻 Exemple de code
+
+```java
+String hashedPwd = PasswordHasher.hashPassword(userPwd);
+banque.createClient(userId, hashedPwd, nom, prenom, adresse, male, numClient);
+
+
 ## 🧪 Tests et Validation
 
 ### Points de vérification
@@ -179,7 +196,7 @@ _00_ASBank2023/
 - [x] IntelliJ IDEA Ultimate installé et activé
 - [x] Tomcat 9 configuré dans IntelliJ
 - [x] MySQL Server et Workbench installés
-- [x] Base de données `Banque2023` créée
+- [x] Base de données `Banque2025` créée
 - [x] Script SQL importé avec succès
 - [x] Configuration de connexion à la base de données
 - [x] Compilation du projet réussie
@@ -191,11 +208,11 @@ _00_ASBank2023/
 Une fois l'installation terminée, vous devriez voir :
 
 ```
-Bienvenue sur l'application IUT Bank 2023
+Bienvenue sur l'application IUT Bank 2025
      Information
      Page de Login
      
-     Projet BUT-3A / 2023-2024
+     Projet BUT-3A / 2025-2024
 ```
 
 ## Dépannage
@@ -210,11 +227,34 @@ Bienvenue sur l'application IUT Bank 2023
 | **Compilation échoue** | Invalidez les caches : **File** → **Invalidate Caches and Restart** |
 
 
+### 🧪 Tests ajoutés pour vérifier l'utilisation du hachage de mot de passe
+
+Une série de tests unitaires a été ajoutée pour vérifier le bon fonctionnement du module de sécurité des mots de passe (`PasswordHasher`).
+
+**Classe concernée :**  
+`src/test/java/com/iut/banque/test/cryptage/TestsPasswordHasher.java`
+
+#### Tests vérifiés :
+| Test | Description |
+|------|--------------|
+| `testHashNotNull()` | Vérifie que le hash n’est jamais `null` |
+| `testHashLength()` | Vérifie que le hash contient exactement 64 caractères |
+| `testSamePasswordSameHash()` | Le même mot de passe doit donner le même hash |
+| `testDifferentPasswordsDifferentHash()` | Deux mots de passe différents produisent des hash différents |
+| `testVerifyPasswordCorrect()` | Vérifie qu’un mot de passe correct est validé |
+| `testVerifyPasswordIncorrect()` | Vérifie qu’un mot de passe incorrect est rejeté |
+
+#### Exécution des tests :
+Dans IntelliJ :
+```bash
+# Clic droit sur la classe TestsPasswordHasher.java
+# → Run 'TestsPasswordHasher'
+
+
 ## 👥 Contributeurs
 
-- **Ouadie Abbaz** - Développeur
-- **Arnaud Acquistapace** - Développeur  
 - **Alexandre Kesseler** - Développeur
+- **Amer** - Développeur
 
 ## 📚 Documentation
 
