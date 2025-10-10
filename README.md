@@ -187,7 +187,7 @@ Lors de la création d’un nouvel utilisateur (`CreerUtilisateur`), le mot de p
 ```java
 String hashedPwd = PasswordHasher.hashPassword(userPwd);
 banque.createClient(userId, hashedPwd, nom, prenom, adresse, male, numClient);
-
+```
 
 ## 🧪 Tests et Validation
 
@@ -212,8 +212,8 @@ Bienvenue sur l'application IUT Bank 2025
      Information
      Page de Login
      
-     Projet BUT-3A / 2025-2024
-
+     Projet BUT-3A / 2025-2026
+```
 ## Dépannage
 
 ### Problèmes courants
