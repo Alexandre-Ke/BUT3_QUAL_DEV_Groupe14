@@ -174,7 +174,7 @@ _00_ASBank2025/
 
 ### Schéma UML du projet 
 
-![Texte alternatif](Documentation/UML projet ASBank2025.png)
+![UML Diagram](Documentation/UML projet ASBank2025.png)
 
 
 ## 🔐 Gestion sécurisée des mots de passe
