@@ -12,7 +12,7 @@
 Application bancaire développée dans le cadre du BUT3 Informatique - Module R5.A.08 Qualité Dev. 
 Cette application web permet la gestion complète des opérations bancaires avec une architecture Java EE.
 
-**Développé par :** Ouadie Abbaz, Arnaud Acquistapace, Alexandre Kesseler  
+**Développé par :** Alexandre Kesseler, Amer AIT CHIKHOUNE  
 **Formation :** BUT3 QUAL_DEV_Groupe1  
 **Année :** 2025
 
@@ -258,7 +258,7 @@ Dans IntelliJ :
 
 ## 👥 Contributeurs 
 - **Alexandre Kesseler** - Développeur 
-- **Amer** - Développeur 
+- **Amer AIT CHIKHOUNE** - Développeur 
 
 ## 📚 Documentation La documentation technique complète est disponible dans le dossier `/Documentation` : 
 - [Documentation Technique d'Installation - ASBank2025.pdf](Documentation/Documentation%20Technique%20d'Installation%20-%20ASBank2025.pdf)
