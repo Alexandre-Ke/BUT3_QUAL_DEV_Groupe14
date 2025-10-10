@@ -172,6 +172,11 @@ _00_ASBank2025/
 
 ```
 
+### Schéma UML du projet 
+
+![Texte alternatif](Documentation/UML projet ASBank2025.png)
+
+
 ## 🔐 Gestion sécurisée des mots de passe
 
 Depuis la version **ASBank 2025**, l’application gère désormais les **mots de passe utilisateurs de manière sécurisée** grâce à un **hachage unidirectionnel SHA-256**.
