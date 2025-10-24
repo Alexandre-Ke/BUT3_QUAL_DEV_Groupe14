@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.iut.banque.cryptage.PasswordHasher;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.springframework.transaction.annotation.Transactional;
@@ -207,12 +208,10 @@ public class DaoHibernate implements IDao {
 				return false;
 			}
 
-			// 🔹 Debug temporaire pour vérifier les valeurs comparées
 			System.out.println("Comparaison hash Java : " + userPwd);
 			System.out.println("Hash en base :         " + user.getUserPwd());
 
-			// ✅ Compare en ignorant la casse et les espaces
-			return userPwd.equalsIgnoreCase(user.getUserPwd().trim());
+			return PasswordHasher.hashPassword(userPwd).equalsIgnoreCase(user.getUserPwd().trim());
 		} finally {
 			session.close();
 		}
