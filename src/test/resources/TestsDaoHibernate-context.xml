@@ -39,9 +39,9 @@
 		class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
 		<property name="driverClassName" value="com.mysql.jdbc.Driver" />
 		<property name="url"
-			value="jdbc:mysql://localhost:3308/banque_essais" />
-		<property name="username" value="root" />
-		<property name="password" value="" />
+			value="jdbc:mysql://82.26.157.66:3306/banque_essais" />
+		<property name="username" value="AppUser" />
+		<property name="password" value="QualDev05@" />
 		<!-- Nécessaire, sinon les test se font quand même -->
 		<property name="defaultAutoCommit" value="false" />
 	</bean>

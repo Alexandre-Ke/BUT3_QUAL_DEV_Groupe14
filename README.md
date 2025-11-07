@@ -109,8 +109,8 @@ USE Banque2025;
 
 ```xml
 <bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
-    <property name="url" value="jdbc:mysql://localhost:3306/Banque2025"/>
-    <property name="username" value="root"/>
+    <property name="url" value="jdbc:mysql://82.26.157.66:3306/Banque2025"/>
+    <property name="username" value="AppUser"/>
     <property name="password" value="[votre_mot_de_passe]"/>
 </bean>
 ```
