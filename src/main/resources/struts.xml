@@ -296,6 +296,24 @@
 		<action name="urlAjoutUtilisateur" class="com.iut.banque.controller.CreerUtilisateur">
 			<result>/JSP/CreerUtilisateur.jsp</result>
 		</action>
+        <action name="modifierMotDePasse" class="com.iut.banque.controller.ModifierMotDePasse">
+            <result name="success">/JSP/ModifierMotDePasse.jsp</result>
+            <result name="error">/JSP/ModifierMotDePasse.jsp</result>
+            <result name="login" type="redirectAction">redirectionLogin</result>
+        </action>
 
+        <!-- Réinitialisation du mot de passe -->
+        <action name="reinitialiserMotDePasse" class="com.iut.banque.controller.ReinitialiserMotDePasseController" method="etape1">
+            <result name="etape1">/JSP/ReinitialiserMotDePasseEtape1.jsp</result>
+        </action>
+        <action name="verifierIdentite" class="com.iut.banque.controller.ReinitialiserMotDePasseController" method="verifierIdentite">
+            <result name="etape1">/JSP/ReinitialiserMotDePasseEtape1.jsp</result>
+            <result name="etape2">/JSP/ReinitialiserMotDePasseEtape2.jsp</result>
+        </action>
+        <action name="changerMotDePasse" class="com.iut.banque.controller.ReinitialiserMotDePasseController" method="changerMotDePasse">
+            <result name="success" type="redirectAction">redirectionLogin</result>
+            <result name="etape2">/JSP/ReinitialiserMotDePasseEtape2.jsp</result>
+            <result name="etape1" type="redirectAction">reinitialiserMotDePasse</result>
+        </action>
 	</package>
 </struts>

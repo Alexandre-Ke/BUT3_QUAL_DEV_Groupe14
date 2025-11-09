@@ -7,7 +7,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <title>Tableau de bord</title>
-<link rel="stylesheet" href="/_00_ASBank2023/style/style.css" />
+<link rel="stylesheet" href="${pageContext.request.contextPath}/style/style.css" />
 </head>
 <body>
 	<div class="btnLogout">
@@ -20,6 +20,15 @@
 		Bienvenue <b><s:property value="connectedUser.prenom" /> <s:property
 				value="connectedUser.nom" /></b> !
 	</p>
+    <s:if test="connectedUser.numeroClient != null">
+        <p>
+            Votre numéro de client est : <b><s:property value="connectedUser.numeroClient" /></b>
+        </p>
+    </s:if>
+    <p>
+        <s:url action="modifierMotDePasse" var="urlModifierMotDePasse" />
+        <s:a href="%{urlModifierMotDePasse}">Modifier le mot de passe</s:a>
+    </p>
 	<p>Voici l'état de vos comptes :</p>
 	<table>
 		<tr>

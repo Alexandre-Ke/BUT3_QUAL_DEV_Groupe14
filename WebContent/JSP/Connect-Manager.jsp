@@ -6,7 +6,7 @@
 <head>
 <title>Tableau de bord - Gestionnaire</title>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<link rel="stylesheet" href="/_00_ASBank2023/style/style.css" />
+<link rel="stylesheet" href="${pageContext.request.contextPath}/style/style.css" />
 </head>
 <body>
 	<div class="btnLogout">
@@ -17,6 +17,10 @@
 	<h1>Tableau de bord - Gestionnaire</h1>
 	
 	<p>Bienvenue <b><s:property value="connectedUser.prenom" /> <s:property value="connectedUser.nom" /></b> !</p>
+    <p>
+        <s:url action="modifierMotDePasse" var="urlModifierMotDePasse" />
+        <s:a href="%{urlModifierMotDePasse}">Modifier le mot de passe</s:a>
+    </p>
 	<p>Que voulez vous faire ?</p>
 	<p>
 		<s:url action="listeCompteManager" var="urlListeCompteManager" >

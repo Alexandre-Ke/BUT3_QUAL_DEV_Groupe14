@@ -115,7 +115,7 @@ public class BanqueFacade {
 	 * @param client
 	 *            : le client à qui appartient le compte
 	 * @throws TechnicalException
-	 *             : Si l'id fourni en param�tre est déjà assigné à un autre
+	 *             : Si l'id fourni en paramtre est déjà assigné à un autre
 	 *             compte de la base
 	 * @throws IllegalFormatException
 	 *             : si le numeroCompte n'est pas du bon format
@@ -137,7 +137,7 @@ public class BanqueFacade {
 	 * @param decouvertAutorise
 	 *            : le decouvert autorise sur ce compte
 	 * @throws TechnicalException
-	 *             : Si l'id fourni en param�tre est déjà assigné à un autre
+	 *             : Si l'id fourni en paramtre est déjà assigné à un autre
 	 *             compte de la base
 	 * @throws IllegalFormatException
 	 *             : si le numeroCompte n'est pas du bon format
@@ -168,7 +168,7 @@ public class BanqueFacade {
 	}
 
 	/**
-	 * Cr�er un manager. L'utilisateur connecté doit être un gestionnaire.
+	 * Crer un manager. L'utilisateur connecté doit être un gestionnaire.
 	 * 
 	 * @param userId
 	 * @param userPwd
@@ -177,7 +177,7 @@ public class BanqueFacade {
 	 * @param adresse
 	 * @param male
 	 * @throws TechnicalException
-	 *             : Si l'id fourni en param�tre est déjà assigné à un autre
+	 *             : Si l'id fourni en paramtre est déjà assigné à un autre
 	 *             utilisateur de la base
 	 * @throws IllegalFormatException
 	 * @throws IllegalArgumentException
@@ -275,5 +275,21 @@ public class BanqueFacade {
 		if (loginManager.getConnectedUser() instanceof Gestionnaire) {
 			banqueManager.changeDecouvert(compte, nouveauDecouvert);
 		}
+	}
+
+    public void updatePassword(Utilisateur user, String oldPassword, String newPassword) throws IllegalOperationException {
+        banqueManager.updatePassword(user, oldPassword, newPassword);
+    }
+
+	public Utilisateur rechercherUtilisateurPourReinitialisation(String userId, String nom, String prenom, String numeroClient) {
+		return banqueManager.rechercherUtilisateurPourReinitialisation(userId, nom, prenom, numeroClient);
+	}
+
+	public void reinitialiserLeMotDePasse(Utilisateur user, String nouveauMotDePasse) {
+		banqueManager.reinitialiserLeMotDePasse(user, nouveauMotDePasse);
+	}
+
+	public Utilisateur getUserById(String userId) {
+		return banqueManager.getUserById(userId);
 	}
 }

@@ -29,6 +29,10 @@ public class PasswordHasher {
 
     // Vérifie si un mot de passe correspond à un hash attendu
     public static boolean verifyPassword(String rawPassword, String expectedHash) {
-        return hashPassword(rawPassword).equals(expectedHash);
+        if (expectedHash == null) {
+            return false;
+        }
+        String hashedInput = hashPassword(rawPassword);
+        return hashedInput.equalsIgnoreCase(expectedHash.trim());
     }
 }

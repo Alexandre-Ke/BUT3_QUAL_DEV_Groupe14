@@ -208,9 +208,6 @@ public class DaoHibernate implements IDao {
 				return false;
 			}
 
-			System.out.println("Comparaison hash Java : " + userPwd);
-			System.out.println("Hash en base :         " + user.getUserPwd());
-
 			return PasswordHasher.hashPassword(userPwd).equalsIgnoreCase(user.getUserPwd().trim());
 		} finally {
 			session.close();

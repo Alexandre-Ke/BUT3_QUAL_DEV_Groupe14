@@ -2,6 +2,7 @@ package com.iut.banque.facade;
 
 import java.util.Map;
 
+import com.iut.banque.cryptage.PasswordHasher;
 import com.iut.banque.exceptions.IllegalFormatException;
 import com.iut.banque.exceptions.IllegalOperationException;
 import com.iut.banque.exceptions.InsufficientFundsException;
@@ -83,7 +84,7 @@ public class BanqueManager {
 	 * données
 	 * 
 	 * @param compte
-	 *            : un objet de type compte repr�sentant le compte à créditer
+	 *            : un objet de type compte reprsentant le compte à créditer
 	 * @param montant
 	 *            : un double correspondant au montant à créditer
 	 * @throws IllegalFormatException
@@ -130,7 +131,7 @@ public class BanqueManager {
 	}
 
 	/**
-	 * Cette méthode appelle la DAO pour cr�er un compte sans découvert dans la
+	 * Cette méthode appelle la DAO pour crer un compte sans découvert dans la
 	 * BdD
 	 * 
 	 * @param numeroCompte
@@ -231,7 +232,7 @@ public class BanqueManager {
 	 *            String pour le numero de client
 	 * @throws IllegalOperationException
 	 * @throws TechnicalException
-	 *             : Si l'id fourni en param�tre est déjà assigné à un autre
+	 *             : Si l'id fourni en paramtre est déjà assigné à un autre
 	 *             utilisateur de la base
 	 * @throws IllegalFormatException
 	 * @throws IllegalArgumentException
@@ -289,4 +290,32 @@ public class BanqueManager {
 		dao.updateAccount(compte);
 	}
 
+    public void updatePassword(Utilisateur user, String oldPassword, String newPassword) throws IllegalOperationException {
+        if (PasswordHasher.verifyPassword(oldPassword, user.getUserPwd())) {
+            String hashedNewPassword = PasswordHasher.hashPassword(newPassword);
+            user.setUserPwd(hashedNewPassword);
+            dao.updateUser(user);
+        } else {
+            throw new IllegalOperationException("L'ancien mot de passe est incorrect.");
+        }
+    }
+
+	public Utilisateur rechercherUtilisateurPourReinitialisation(String userId, String nom, String prenom, String numeroClient) {
+		Utilisateur user = dao.getUserById(userId);
+		if (user instanceof Client) {
+			Client client = (Client) user;
+			if (client.getNom().equalsIgnoreCase(nom) &&
+				client.getPrenom().equalsIgnoreCase(prenom) &&
+				client.getNumeroClient().equals(numeroClient)) {
+				return user;
+			}
+		}
+		return null;
+	}
+
+	public void reinitialiserLeMotDePasse(Utilisateur user, String nouveauMotDePasse) {
+		String hashedNewPassword = PasswordHasher.hashPassword(nouveauMotDePasse);
+		user.setUserPwd(hashedNewPassword);
+		dao.updateUser(user);
+	}
 }

@@ -1,7 +1,11 @@
 package com.iut.banque.test.facade;
 
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
 
+import com.iut.banque.cryptage.PasswordHasher;
+import com.iut.banque.modele.Utilisateur;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -167,4 +171,85 @@ public class TestsBanqueManager {
 		}
 	}
 
+	// Tests en rapport avec la modification du mot de passe
+	@Test
+	public void TestModificationMotDePasseSucces() {
+		try {
+			bm.loadAllClients();
+			String password = "password";
+			String hashedPassword = PasswordHasher.hashPassword(password);
+			bm.createClient("t.pwdsucces1", hashedPassword, "Test", "User", "Test Address", true, "1111111111");
+			Utilisateur user = bm.getUserById("t.pwdsucces1");
+			bm.updatePassword(user, password, "newPassword");
+			Utilisateur updatedUser = bm.getUserById("t.pwdsucces1");
+			if (!PasswordHasher.verifyPassword("newPassword", updatedUser.getUserPwd())) {
+				fail("Le nouveau mot de passe n'a pas été correctement mis à jour dans la base de données.");
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail("Une exception a été levée lors de la modification du mot de passe : " + e.getMessage());
+		}
+	}
+
+	@Test
+	public void TestModificationMotDePasseAncienMotDePasseIncorrect() {
+		try {
+			bm.loadAllClients();
+			String password = "password";
+			String hashedPassword = PasswordHasher.hashPassword(password);
+			bm.createClient("t.pwdincorrect1", hashedPassword, "Test", "User", "Test Address", true, "2222222222");
+			Utilisateur user = bm.getUserById("t.pwdincorrect1");
+			bm.updatePassword(user, "wrongPassword", "newPassword");
+			fail("Une IllegalOperationException aurait dû être levée.");
+		} catch (IllegalOperationException e) {
+			// Test réussi
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail("Une exception inattendue a été levée : " + e.getClass().getSimpleName());
+		}
+	}
+
+	// Tests en rapport avec la réinitialisation du mot de passe
+	@Test
+	public void TestRechercherUtilisateurPourReinitialisationSucces() {
+		try {
+			bm.loadAllClients();
+			bm.createClient("j.reinitsucces1", "password", "Doe", "John", "123 Main St", true, "9999999999");
+			Utilisateur user = bm.rechercherUtilisateurPourReinitialisation("j.reinitsucces1", "Doe", "John", "9999999999");
+			assertNotNull("L'utilisateur aurait dû être trouvé.", user);
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail("Une exception inattendue a été levée : " + e.getMessage());
+		}
+	}
+
+	@Test
+	public void TestRechercherUtilisateurPourReinitialisationEchec() {
+		try {
+			bm.loadAllClients();
+			bm.createClient("j.reinitechec1", "password", "Doe", "John", "123 Main St", true, "8888888888");
+			Utilisateur user = bm.rechercherUtilisateurPourReinitialisation("j.reinitechec1", "Doe", "Jane", "8888888888");
+			assertNull("L'utilisateur n'aurait pas dû être trouvé.", user);
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail("Une exception inattendue a été levée : " + e.getMessage());
+		}
+	}
+
+	@Test
+	public void TestReinitialiserLeMotDePasseSucces() {
+		try {
+			bm.loadAllClients();
+			bm.createClient("j.reinitpwd1", "password", "Doe", "John", "123 Main St", true, "7777777777");
+			Utilisateur user = bm.getUserById("j.reinitpwd1");
+			bm.reinitialiserLeMotDePasse(user, "nouveauMotDePasseSuperSecret");
+			Utilisateur updatedUser = bm.getUserById("j.reinitpwd1");
+			if (!PasswordHasher.verifyPassword("nouveauMotDePasseSuperSecret", updatedUser.getUserPwd())) {
+				fail("Le mot de passe n'a pas été correctement réinitialisé.");
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail("Une exception inattendue a été levée : " + e.getMessage());
+		}
+	}
 }
