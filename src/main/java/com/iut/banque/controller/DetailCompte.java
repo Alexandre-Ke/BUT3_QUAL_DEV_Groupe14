@@ -1,6 +1,8 @@
 package com.iut.banque.controller;
 
 import org.apache.struts2.ServletActionContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 
@@ -15,101 +17,76 @@ import com.opensymphony.xwork2.ActionSupport;
 public class DetailCompte extends ActionSupport {
 
 	private static final long serialVersionUID = 1L;
-	protected BanqueFacade banque;
+
+	// --- Constantes pour éviter les littéraux dupliqués
+	private static final String SUCCESS = "SUCCESS";
+	private static final String ERROR = "ERROR";
+	private static final String NOT_ENOUGH_FUNDS = "NOTENOUGHFUNDS";
+	private static final String NEGATIVE_AMOUNT = "NEGATIVEAMOUNT";
+	private static final String NEGATIVE_OVERDRAFT = "NEGATIVEOVERDRAFT";
+	private static final String INCOMPATIBLE_OVERDRAFT = "INCOMPATIBLEOVERDRAFT";
+	private static final String TECHNICAL = "TECHNICAL";
+	private static final String BUSINESS = "BUSINESS";
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(DetailCompte.class);
+
+	// Non sérialisables -> transient pour les actions Struts
+	protected transient BanqueFacade banque;
+	protected transient Compte compte;
+
 	private String montant;
 	private String error;
-	protected Compte compte;
 
-	/**
-	 * Constructeur du controlleur DetailCompte
-	 * 
-	 * Récupère l'ApplicationContext
-	 * 
-	 * @return un nouvel objet DetailCompte avec une BanqueFacade provenant de
-	 *         la factory
-	 */
 	public DetailCompte() {
-		System.out.println("In Constructor from DetailCompte class ");
+		LOGGER.debug("Construction DetailCompte");
 		ApplicationContext context = WebApplicationContextUtils
 				.getRequiredWebApplicationContext(ServletActionContext.getServletContext());
 		this.banque = (BanqueFacade) context.getBean("banqueFacade");
 	}
 
-	/**
-	 * Retourne sous forme de string le message d'erreur basé sur le champ
-	 * "error" actuellement défini dans la classe
-	 * 
-	 * @return String, le string avec le détail du message d'erreur
-	 */
 	public String getError() {
-		switch (error) {
-		case "TECHNICAL":
-			return "Erreur interne. Verifiez votre saisie puis réessayer. Contactez votre conseiller si le problème persiste.";
-		case "BUSINESS":
-			return "Fonds insuffisants.";
-		case "NEGATIVEAMOUNT":
-			return "Veuillez rentrer un montant positif.";
-		case "NEGATIVEOVERDRAFT":
-			return "Veuillez rentrer un découvert positif.";
-		case "INCOMPATIBLEOVERDRAFT":
-			return "Le nouveau découvert est incompatible avec le solde actuel.";
-		default:
+		if (error == null) {
 			return "";
 		}
-	}
-
-	/**
-	 * Permet de définir le champ error de la classe avec le string passé en
-	 * paramètre. Si jamais on passe un objet null, on adapte le string
-	 * automatiquement en "EMPTY"
-	 * 
-	 * @param error
-	 *            : Un String correspondant à celui qu'on veut définir dans le
-	 *            champ error
-	 */
-	public void setError(String error) {
-		if (error == null) {
-			this.error = "EMPTY";
-		} else {
-			this.error = error;
+		switch (error) {
+			case TECHNICAL:
+				return "Erreur interne. Verifiez votre saisie puis réessayer. Contactez votre conseiller si le problème persiste.";
+			case BUSINESS:
+				return "Fonds insuffisants.";
+			case NEGATIVE_AMOUNT:
+				return "Veuillez rentrer un montant positif.";
+			case NEGATIVE_OVERDRAFT:
+				return "Veuillez rentrer un découvert positif.";
+			case INCOMPATIBLE_OVERDRAFT:
+				return "Le nouveau découvert est incompatible avec le solde actuel.";
+			default:
+				return "";
 		}
 	}
 
-	/**
-	 * Getter du champ montant
-	 * 
-	 * @return String : valeur du champ montant
-	 */
+	public void setError(String error) {
+		this.error = (error == null) ? "" : error;
+	}
+
 	public String getMontant() {
 		return montant;
 	}
 
-	/**
-	 * Setter du champ montant
-	 * 
-	 * @param montant
-	 *            un String correspondant au montant à définir
-	 */
 	public void setMontant(String montant) {
 		this.montant = montant;
 	}
 
 	/**
-	 * Getter du compte actuellement sélectionné. Récupère la liste des comptes
-	 * de l'utilisateur connecté dans un premier temps. Récupère ensuite dans la
-	 * HashMap la clé qui comporte le string provenant de idCompte. Renvoie donc
-	 * null si le compte n'appartient pas à l'utilisateur
-	 * 
-	 * @return Compte : l'objet compte après s'être assuré qu'il appartient à
-	 *         l'utilisateur
+	 * Retourne le compte s’il appartient au client connecté (ou si un gestionnaire est connecté)
 	 */
 	public Compte getCompte() {
 		if (banque.getConnectedUser() instanceof Gestionnaire) {
 			return compte;
-		} else if (banque.getConnectedUser() instanceof Client) {
-			if (((Client) banque.getConnectedUser()).getAccounts().containsKey(compte.getNumeroCompte())) {
-				return compte;
-			}
+		}
+		if (banque.getConnectedUser() instanceof Client
+				&& compte != null
+				&& ((Client) banque.getConnectedUser()).getAccounts().containsKey(compte.getNumeroCompte())) {
+			return compte;
 		}
 		return null;
 	}
@@ -118,46 +95,42 @@ public class DetailCompte extends ActionSupport {
 		this.compte = compte;
 	}
 
-	/**
-	 * Méthode débit pour débter le compte considéré en cours
-	 * 
-	 * @return String : Message correspondant à l'état du débit (si il a réussi
-	 *         ou pas)
-	 */
+	/** Débiter le compte */
 	public String debit() {
-		Compte compte = getCompte();
+		final Compte selectedCompte = getCompte();
+		if (selectedCompte == null) {
+			return ERROR;
+		}
 		try {
-			banque.debiter(compte, Double.parseDouble(montant.trim()));
-			return "SUCCESS";
+			banque.debiter(selectedCompte, Double.parseDouble(montant.trim()));
+			return SUCCESS;
 		} catch (NumberFormatException e) {
-			e.printStackTrace();
-			return "ERROR";
-		} catch (InsufficientFundsException ife) {
-			ife.printStackTrace();
-			return "NOTENOUGHFUNDS";
+			LOGGER.warn("Montant invalide pour debit: '{}'", montant, e);
+			return ERROR;
+		} catch (InsufficientFundsException e) {
+			LOGGER.info("Fonds insuffisants pour {}", selectedCompte.getNumeroCompte(), e);
+			return NOT_ENOUGH_FUNDS;
 		} catch (IllegalFormatException e) {
-			e.printStackTrace();
-			return "NEGATIVEAMOUNT";
+			LOGGER.info("Montant négatif pour debit: '{}'", montant, e);
+			return NEGATIVE_AMOUNT;
 		}
 	}
 
-	/**
-	 * Méthode crédit pour créditer le compte considéré en cours
-	 * 
-	 * @return String : Message correspondant à l'état du crédit (si il a réussi
-	 *         ou pas)
-	 */
+	/** Créditer le compte */
 	public String credit() {
-		Compte compte = getCompte();
+		final Compte selectedCompte = getCompte();
+		if (selectedCompte == null) {
+			return ERROR;
+		}
 		try {
-			banque.crediter(compte, Double.parseDouble(montant.trim()));
-			return "SUCCESS";
-		} catch (NumberFormatException nfe) {
-			nfe.printStackTrace();
-			return "ERROR";
+			banque.crediter(selectedCompte, Double.parseDouble(montant.trim()));
+			return SUCCESS;
+		} catch (NumberFormatException e) {
+			LOGGER.warn("Montant invalide pour credit: '{}'", montant, e);
+			return ERROR;
 		} catch (IllegalFormatException e) {
-			e.printStackTrace();
-			return "NEGATIVEAMOUNT";
+			LOGGER.info("Montant négatif pour credit: '{}'", montant, e);
+			return NEGATIVE_AMOUNT;
 		}
 	}
 }

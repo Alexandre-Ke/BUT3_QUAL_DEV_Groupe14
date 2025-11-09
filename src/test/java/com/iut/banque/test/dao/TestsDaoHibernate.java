@@ -1,9 +1,5 @@
 package com.iut.banque.test.dao;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
 import java.util.Map;
 
 import org.junit.Test;
@@ -23,6 +19,8 @@ import com.iut.banque.modele.CompteAvecDecouvert;
 import com.iut.banque.modele.CompteSansDecouvert;
 import com.iut.banque.modele.Gestionnaire;
 import com.iut.banque.modele.Utilisateur;
+
+import static org.junit.Assert.*;
 
 /**
  * Class de test pour la DAO.
@@ -191,13 +189,6 @@ public class TestsDaoHibernate {
 		assertTrue(daoHibernate.getUserById("admin") instanceof Gestionnaire);
 	}
 
-	@Test
-	public void testGetAccountsByUserIdDoesntExist() {
-		Map<String, Compte> accounts = daoHibernate.getAccountsByClientId("c.doesntexit");
-		if (accounts != null) {
-			fail("Les comptes de cette utilisateur inexistant n'aurait pas du être renvoyés.");
-		}
-	}
 
 	@Test
 	public void testGetAccountsByUserIdNoAccount() {

@@ -3,81 +3,45 @@ package com.iut.banque.converter;
 import java.util.Map;
 
 import org.apache.struts2.util.StrutsTypeConverter;
-
-import com.opensymphony.xwork2.conversion.TypeConversionException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.iut.banque.interfaces.IDao;
 import com.iut.banque.modele.Client;
+import com.opensymphony.xwork2.conversion.TypeConversionException;
 
-/**
- * Cette classe contient des méthodes permettant de convertir un client en
- * string et vice-versa. Elle est déclarée dans
- * «src/main/webapp/WEB-INF/classes/xwork-conversion.properties.
- * 
- * Grâce à cette classe il est possible de passer en paramêtre d'une action
- * Struts l'identifiant d'un client (une string) et le contrôleur qui va
- * recevoir le paramêtre n'a besoin que d'un setter prenant un objet de type
- * Client.
- */
 public class ClientConverter extends StrutsTypeConverter {
 
-	/**
-	 * DAO utilisée pour récuperer les objets correspondants à l'id passé en
-	 * paramêtre de convertFromString.
-	 * 
-	 * Note : Ce champ est static car pour une raison qui nous échappe, le scope
-	 * « singleton » du bean Spring utilisé pour l'injection n'est pas respecté.
-	 * Ainsi, au chargement de l'application, trois objets de cette classe sont
-	 * instanciés et seulement le premier a une DAO injectée correctement.
-	 */
-	private static IDao dao;
+	private static final Logger LOG = LoggerFactory.getLogger(ClientConverter.class);
 
-	/**
-	 * Constructeur avec paramêtre pour le ClientConverter.
-	 * 
-	 * Utilisé pour l'injection de dépendance.
-	 * 
-	 * @param dao
-	 */
+	/** Injection par constructeur, plus de champ static. */
+	private final IDao dao;
+
 	public ClientConverter(IDao dao) {
-		System.out.println("=========================");
-		System.out.println("Création du convertisseur de client");
-		ClientConverter.dao = dao;
-		// System.out.println("DAO injectée : " + dao);
+		this.dao = dao;
+		LOG.debug("Création du convertisseur de client");
 	}
 
-	/**
-	 * Constructeur sans paramêtre pour le ClientConverter
-	 */
-	public ClientConverter() {
-		System.out.println("=========================");
-		System.out.println("Création du convertisseur de client");
-		// System.out.println("DAO : " + dao);
-	}
-
-	/**
-	 * Permet la conversion automatique par Struts d'un tableau de chaine vers
-	 * un Client
-	 */
-	@SuppressWarnings("rawtypes")
+	@SuppressWarnings({ "rawtypes" })
 	@Override
-	public Object convertFromString(Map context, String[] values, Class classe) {
-		Client client = null;
-		client = (Client) dao.getUserById(values[0]);
+	public Object convertFromString(Map context, String[] values, Class toClass) {
+		if (values == null || values.length == 0 || values[0] == null) {
+			throw new TypeConversionException("Valeur de client manquante.");
+		}
+		final Client client = (Client) dao.getUserById(values[0]);
 		if (client == null) {
-			throw new TypeConversionException("Impossible de convertir la chaine suivante : " + values[0]);
+			throw new TypeConversionException("Impossible de convertir la chaîne : " + values[0]);
 		}
 		return client;
 	}
 
-	/**
-	 * Permet la conversion automatique par Struts d'un Client vers une chaine
-	 */
-	@SuppressWarnings("rawtypes")
+	@SuppressWarnings({ "rawtypes" })
 	@Override
 	public String convertToString(Map context, Object value) {
-		Client client = (Client) value;
-		return client == null ? null : client.getIdentity();
+		if (!(value instanceof Client)) {
+			return null;
+		}
+		final Client client = (Client) value;
+		return client.getIdentity();
 	}
-
 }
