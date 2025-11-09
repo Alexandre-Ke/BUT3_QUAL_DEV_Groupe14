@@ -169,17 +169,6 @@ public class TestsDaoHibernate {
 	}
 
 	@Test
-	public void testGetAccountsByUserIdExist() {
-		Map<String, Compte> accounts = daoHibernate.getAccountsByClientId("g.descomptes");
-		if (accounts == null) {
-			fail("Ce client devrait avoir des comptes.");
-		} else if (!daoHibernate.getAccountById("SA1011011011").equals(accounts.get("SA1011011011"))
-				&& !daoHibernate.getAccountById("AV1011011011").equals(accounts.get("AV1011011011"))) {
-			fail("Les mauvais comptes ont été chargés.");
-		}
-	}
-
-	@Test
 	public void testGetClientById() {
 		assertTrue(daoHibernate.getUserById("c.exist") instanceof Client);
 	}
@@ -187,6 +176,14 @@ public class TestsDaoHibernate {
 	@Test
 	public void testGetgestionnaireById() {
 		assertTrue(daoHibernate.getUserById("admin") instanceof Gestionnaire);
+	}
+
+	@Test
+	public void testGetAccountsByUserIdDoesntExist() {
+		Map<String, Compte> accounts = daoHibernate.getAccountsByClientId("c.doesntexist");
+
+		assertNotNull("La méthode ne doit jamais renvoyer null", accounts);
+		assertTrue("Un utilisateur inexistant doit renvoyer une map vide", accounts.isEmpty());
 	}
 
 

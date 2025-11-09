@@ -43,6 +43,9 @@ replay_pid*
 *.iml
 *.ipr
 
+### MACOS file ###
+.DS_Store
+
 ### NetBeans ###
 /nbproject/private/
 /build/
