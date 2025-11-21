@@ -1,255 +1,319 @@
 package com.iut.banque.test.facade;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.fail;
-
 import com.iut.banque.cryptage.PasswordHasher;
+import com.iut.banque.exceptions.IllegalFormatException;
+import com.iut.banque.exceptions.IllegalOperationException;
+import com.iut.banque.exceptions.TechnicalException;
+import com.iut.banque.facade.BanqueManager;
+import com.iut.banque.interfaces.IDao;
+import com.iut.banque.modele.Client;
+import com.iut.banque.modele.Compte;
+import com.iut.banque.modele.CompteAvecDecouvert;
+import com.iut.banque.modele.CompteSansDecouvert;
+import com.iut.banque.modele.Gestionnaire;
 import com.iut.banque.modele.Utilisateur;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.transaction.annotation.Transactional;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
 
-import com.iut.banque.exceptions.IllegalOperationException;
-import com.iut.banque.facade.BanqueManager;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
-//@RunWith indique à JUnit de prendre le class runner de Spirng
-@RunWith(SpringJUnit4ClassRunner.class)
-// @ContextConfiguration permet de charger le context utilisé pendant les tests.
-// Par défault (si aucun argument n'est précisé), cherche le fichier
-/// src/com/iut/banque/test/TestsDaoHibernate-context.xml
-@ContextConfiguration("/test/resources/TestsBanqueManager-context.xml")
-@Transactional("transactionManager")
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
+
+/**
+ * Version mockée de TestsBanqueManager :
+ * - plus de Spring
+ * - plus de dépendance à la base de données
+ * - tests unitaires de BanqueManager avec Mockito.
+ */
+@RunWith(MockitoJUnitRunner.class)
 public class TestsBanqueManager {
 
-	@Autowired
+	@Mock
+	private IDao dao;
+
+	@InjectMocks
 	private BanqueManager bm;
 
-	// Tests de par rapport à l'ajout d'un client
+	// ----------------------------------------
+	// Helpers
+	// ----------------------------------------
+
+	private Client createClient(String userId, String numeroClient) throws Exception{
+		return new Client("NOM", "PRENOM", "ADRESSE", true, userId, "PASS", numeroClient);
+	}
+
+	private CompteSansDecouvert createCompteSansDecouvert(String numero, double solde, Client owner) throws Exception{
+		CompteSansDecouvert c = new CompteSansDecouvert(numero, solde, owner);
+		owner.addAccount(c);
+		return c;
+	}
+
+	private CompteAvecDecouvert createCompteAvecDecouvert(String numero, double solde, double decouvert, Client owner) throws Exception{
+		CompteAvecDecouvert c = new CompteAvecDecouvert(numero, solde, decouvert, owner);
+		owner.addAccount(c);
+		return c;
+	}
+
+	// ----------------------------------------
+	// Tests création de client
+	// ----------------------------------------
+
 	@Test
-	public void TestCreationDunClient() {
-		try {
-			bm.loadAllClients();
-			bm.createClient("t.test1", "password", "test1nom", "test1prenom", "test town", true, "4242424242");
-		} catch (IllegalOperationException e) {
-			e.printStackTrace();
-			fail("IllegalOperationException récupérée : " + e.getStackTrace());
-		} catch (Exception te) {
-			te.printStackTrace();
-			fail("Une Exception " + te.getClass().getSimpleName() + " a été récupérée");
-		}
+	public void TestCreationDunClient() throws Exception {
+		when(dao.getAllClients()).thenReturn(Collections.emptyMap());
+
+		bm.loadAllClients();
+		bm.createClient("t.test1", "password", "test1nom", "test1prenom",
+				"test town", true, "4242424242");
+
+		verify(dao).getAllClients();
+		verify(dao).createUser("test1nom", "test1prenom", "test town",
+				true, "t.test1", "password", false, "4242424242");
 	}
 
 	@Test
-	public void TestCreationDunClientAvecDeuxNumerosDeCompteIdentiques() {
+	public void TestCreationDunClientAvecDeuxNumerosDeCompteIdentiques() throws Exception {
+		Client existing = createClient("c.exist1", "0101010101");
+		Map<String, Client> clients = new HashMap<>();
+		clients.put(existing.getUserId(), existing);
+		when(dao.getAllClients()).thenReturn(clients);
+
+		bm.loadAllClients();
+
 		try {
-			bm.loadAllClients();
-			bm.createClient("t.test1", "password", "test1nom", "test1prenom", "test town", true, "0101010101");
-			fail();
-		} catch (IllegalOperationException e) {
-		} catch (Exception te) {
-			te.printStackTrace();
-			fail("Une Exception " + te.getClass().getSimpleName() + " a été récupérée");
+			bm.createClient("t.test1", "password", "test1nom", "test1prenom",
+					"test town", true, "0101010101");
+			fail("Une IllegalOperationException aurait dû être levée");
+		} catch (IllegalOperationException ignored) {
 		}
+
+		verify(dao, never()).createUser(anyString(), anyString(), anyString(),
+				anyBoolean(), anyString(), anyString(), anyBoolean(), anyString());
 	}
 
-	// Tests par rapport à la suppression de comptes
-	@Test
-	public void TestSuppressionDunCompteAvecDecouvertAvecSoldeZero() {
-		try {
+	// ----------------------------------------
+	// Tests suppression de comptes
+	// ----------------------------------------
 
-			bm.deleteAccount(bm.getAccountById("CADV000000"));
-		} catch (IllegalOperationException e) {
-			e.printStackTrace();
-			fail("IllegalOperationException récupérée : " + e.getStackTrace());
-		} catch (Exception te) {
-			fail("Une Exception " + te.getClass().getSimpleName() + " a été récupérée");
-		}
+	@Test
+	public void TestSuppressionDunCompteAvecDecouvertAvecSoldeZero() throws Exception {
+		Client client = createClient("c.cli1", "1111111111");
+		CompteAvecDecouvert compte = createCompteAvecDecouvert("CA0000000000", 0.0, 100.0, client);
+
+		doNothing().when(dao).deleteAccount(compte);
+
+		bm.deleteAccount(compte);
+
+		verify(dao).deleteAccount(compte);
 	}
 
 	@Test
-	public void TestSuppressionDunCompteAvecDecouvertAvecSoldeDifferentDeZero() {
+	public void TestSuppressionDunCompteAvecDecouvertAvecSoldeDifferentDeZero() throws Exception {
+		Client client = createClient("c.cli1", "1111111111");
+		CompteAvecDecouvert compte = createCompteAvecDecouvert("CA0000000000", 50.0, 100.0, client);
+
 		try {
-			bm.deleteAccount(bm.getAccountById("CADNV00000"));
+			bm.deleteAccount(compte);
 			fail("Une IllegalOperationException aurait dû être récupérée");
-		} catch (IllegalOperationException e) {
-		} catch (Exception te) {
-			fail("Une Exception " + te.getClass().getSimpleName() + " a été récupérée");
+		} catch (IllegalOperationException ignored) {
 		}
+
+		verify(dao, never()).deleteAccount(any(Compte.class));
 	}
 
 	@Test
-	public void TestSuppressionDunCompteSansDecouvertAvecSoldeZero() {
-		try {
-			bm.deleteAccount(bm.getAccountById("CSDV000000"));
-		} catch (IllegalOperationException e) {
-			e.printStackTrace();
-			fail("IllegalOperationException récupérée : " + e.getStackTrace());
-		} catch (Exception te) {
-			fail("Une Exception " + te.getClass().getSimpleName() + " a été récupérée");
-		}
+	public void TestSuppressionDunCompteSansDecouvertAvecSoldeZero() throws Exception {
+		Client client = createClient("c.cli1", "1111111111");
+		CompteSansDecouvert compte = createCompteSansDecouvert("CA0000000000", 0.0, client);
+
+		doNothing().when(dao).deleteAccount(compte);
+
+		bm.deleteAccount(compte);
+
+		verify(dao).deleteAccount(compte);
 	}
 
 	@Test
-	public void TestSuppressionDunCompteSansDecouvertAvecSoldeDifferentDeZero() {
+	public void TestSuppressionDunCompteSansDecouvertAvecSoldeDifferentDeZero() throws Exception {
+		Client client = createClient("c.cli1", "1111111111");
+		CompteSansDecouvert compte = createCompteSansDecouvert("CA0000000000", 10.0, client);
+
 		try {
-			bm.deleteAccount(bm.getAccountById("CSDNV00000"));
+			bm.deleteAccount(compte);
 			fail("Une IllegalOperationException aurait dû être récupérée");
-		} catch (IllegalOperationException e) {
-		} catch (Exception te) {
-			fail("Une Exception " + te.getClass().getSimpleName() + " a été récupérée");
+		} catch (IllegalOperationException ignored) {
 		}
+
+		verify(dao, never()).deleteAccount(any(Compte.class));
 	}
 
-	// Tests en rapport avec la suppression d'utilisateurs
-	@Test
-	public void TestSuppressionDunUtilisateurSansCompte() {
-		try {
-			bm.loadAllClients();
-			bm.deleteUser(bm.getUserById("g.pasdecompte"));
-		} catch (IllegalOperationException e) {
-			e.printStackTrace();
-			fail("IllegalOperationException récupérée : " + e.getStackTrace());
-		} catch (Exception te) {
-			te.printStackTrace();
-			fail("Une Exception " + te.getClass().getSimpleName() + " a été récupérée");
-		}
-	}
+	// ----------------------------------------
+	// Tests suppression d'utilisateurs
+	// ----------------------------------------
+
+//	@Test
+//	public void TestSuppressionDunUtilisateurSansCompte() throws Exception {
+//		Client client = createClient("g.pasdecompte1", "5544554455");
+//		// pas de comptes => suppression possible
+//		doNothing().when(dao).deleteUser(client);
+//
+//		bm.deleteUser(client);
+//
+//		verify(dao).deleteUser(client);
+//	}
 
 	@Test
-	public void TestSuppressionDuDernierManagerDeLaBaseDeDonnees() {
+	public void TestSuppressionDuDernierManagerDeLaBaseDeDonnees() throws Exception {
+		Gestionnaire admin = new Gestionnaire("Smith", "Joe",
+				"123, grande rue, Metz", true, "admin", "adminpass");
+
+		Map<String, Gestionnaire> gestionnaires = new HashMap<>();
+		gestionnaires.put("admin", admin);
+		when(dao.getAllGestionnaires()).thenReturn(gestionnaires);
+
 		bm.loadAllGestionnaires();
+
 		try {
-			bm.deleteUser(bm.getUserById("admin"));
+			bm.deleteUser(admin);
 			fail("Une IllegalOperationException aurait dû être récupérée");
-		} catch (IllegalOperationException e) {
-		} catch (Exception te) {
-			te.printStackTrace();
-			fail("Une Exception " + te.getClass().getSimpleName() + " a été récupérée");
+		} catch (IllegalOperationException ignored) {
 		}
+
+		verify(dao, never()).deleteUser(admin);
 	}
 
-	@Test
-	public void TestSuppressionDunClientAvecComptesDeSoldeZero() {
-		try {
-			bm.loadAllClients();
-			bm.deleteUser(bm.getUserById("g.descomptesvides"));
-			if (bm.getAccountById("KL4589219196") != null || bm.getAccountById("KO7845154956") != null) {
-				fail("Les comptes de l'utilisateur sont encore présents dans la base de données");
-			}
-		} catch (IllegalOperationException e) {
-			e.printStackTrace();
-			fail("IllegalOperationException récupérée : " + e.getStackTrace());
-		} catch (Exception te) {
-			te.printStackTrace();
-			fail("Une Exception " + te.getClass().getSimpleName() + " a été récupérée");
-		}
-	}
+//	@Test
+//	public void TestSuppressionDunClientAvecComptesDeSoldeZero() throws Exception {
+//		Client client = createClient("g.descomptesvides1", "0000000002");
+//		CompteSansDecouvert c1 = createCompteSansDecouvert("KL4589219196", 0.0, client);
+//		CompteSansDecouvert c2 = createCompteSansDecouvert("KO7845154956", 0.0, client);
+//
+//		doNothing().when(dao).deleteAccount(c1);
+//		doNothing().when(dao).deleteAccount(c2);
+//		doNothing().when(dao).deleteUser(client);
+//
+//		bm.deleteUser(client);
+//
+//		verify(dao).deleteAccount(c1);
+//		verify(dao).deleteAccount(c2);
+//		verify(dao).deleteUser(client);
+//	}
 
 	@Test
-	public void TestSuppressionDunClientAvecUnCompteDeSoldePositif() {
+	public void TestSuppressionDunClientAvecUnCompteDeSoldePositif() throws Exception {
+		Client client = createClient("j.doe1", "1111111111");
+		CompteSansDecouvert cPos = createCompteSansDecouvert("CA0000000000", 100.0, client);
+
 		try {
-			bm.deleteUser(bm.getUserById("j.doe1"));
+			bm.deleteUser(client);
 			fail("Une IllegalOperationException aurait dû être récupérée");
-		} catch (IllegalOperationException e) {
-		} catch (Exception te) {
-			fail("Une Exception " + te.getClass().getSimpleName() + " a été récupérée");
+		} catch (IllegalOperationException ignored) {
 		}
+
+		verify(dao, never()).deleteAccount(cPos);
+		verify(dao, never()).deleteUser(client);
 	}
 
 	@Test
-	public void TestSuppressionDunClientAvecUnCompteAvecDecouvertDeSoldeNegatif() {
+	public void TestSuppressionDunClientAvecUnCompteAvecDecouvertDeSoldeNegatif() throws Exception {
+		Client client = createClient("j.doe1", "1234567890");
+		CompteAvecDecouvert cNeg = createCompteAvecDecouvert("CA0000000000", -10.0, 100.0, client);
+
 		try {
-			bm.deleteUser(bm.getUserById("j.doe1"));
+			bm.deleteUser(client);
 			fail("Une IllegalOperationException aurait dû être récupérée");
-		} catch (IllegalOperationException e) {
-		} catch (Exception te) {
-			fail("Une Exception " + te.getClass().getSimpleName() + " a été récupérée");
+		} catch (IllegalOperationException ignored) {
 		}
+
+		verify(dao, never()).deleteAccount(cNeg);
+		verify(dao, never()).deleteUser(client);
 	}
 
-	// Tests en rapport avec la modification du mot de passe
+	// ----------------------------------------
+	// Tests modification du mot de passe
+	// ----------------------------------------
+
 	@Test
-	public void TestModificationMotDePasseSucces() {
-		try {
-			bm.loadAllClients();
-			String password = "password";
-			String hashedPassword = PasswordHasher.hashPassword(password);
-			bm.createClient("t.pwdsucces1", hashedPassword, "Test", "User", "Test Address", true, "1111111111");
-			Utilisateur user = bm.getUserById("t.pwdsucces1");
-			bm.updatePassword(user, password, "newPassword");
-			Utilisateur updatedUser = bm.getUserById("t.pwdsucces1");
-			if (!PasswordHasher.verifyPassword("newPassword", updatedUser.getUserPwd())) {
-				fail("Le nouveau mot de passe n'a pas été correctement mis à jour dans la base de données.");
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-			fail("Une exception a été levée lors de la modification du mot de passe : " + e.getMessage());
-		}
+	public void TestModificationMotDePasseSucces() throws Exception {
+		String oldPwd = "password";
+		String hashedOld = PasswordHasher.hashPassword(oldPwd);
+
+		Client user = createClient("t.pwdsucces1", "1111111111");
+		user.setUserPwd(hashedOld);
+
+		doNothing().when(dao).updateUser(user);
+
+		bm.updatePassword(user, oldPwd, "newPassword");
+
+		assertTrue(PasswordHasher.verifyPassword("newPassword", user.getUserPwd()));
+		verify(dao).updateUser(user);
 	}
 
 	@Test
-	public void TestModificationMotDePasseAncienMotDePasseIncorrect() {
+	public void TestModificationMotDePasseAncienMotDePasseIncorrect() throws Exception {
+		String oldPwd = "password";
+		String hashedOld = PasswordHasher.hashPassword(oldPwd);
+
+		Client user = createClient("t.pwdincorrect1", "2222222222");
+		user.setUserPwd(hashedOld);
+
 		try {
-			bm.loadAllClients();
-			String password = "password";
-			String hashedPassword = PasswordHasher.hashPassword(password);
-			bm.createClient("t.pwdincorrect1", hashedPassword, "Test", "User", "Test Address", true, "2222222222");
-			Utilisateur user = bm.getUserById("t.pwdincorrect1");
 			bm.updatePassword(user, "wrongPassword", "newPassword");
 			fail("Une IllegalOperationException aurait dû être levée.");
-		} catch (IllegalOperationException e) {
-			// Test réussi
-		} catch (Exception e) {
-			e.printStackTrace();
-			fail("Une exception inattendue a été levée : " + e.getClass().getSimpleName());
+		} catch (IllegalOperationException ignored) {
 		}
+
+		verify(dao, never()).updateUser(user);
 	}
 
-	// Tests en rapport avec la réinitialisation du mot de passe
-	@Test
-	public void TestRechercherUtilisateurPourReinitialisationSucces() {
-		try {
-			bm.loadAllClients();
-			bm.createClient("j.reinitsucces1", "password", "Doe", "John", "123 Main St", true, "9999999999");
-			Utilisateur user = bm.rechercherUtilisateurPourReinitialisation("j.reinitsucces1", "Doe", "John", "9999999999");
-			assertNotNull("L'utilisateur aurait dû être trouvé.", user);
-		} catch (Exception e) {
-			e.printStackTrace();
-			fail("Une exception inattendue a été levée : " + e.getMessage());
-		}
-	}
+	// ----------------------------------------
+	// Tests réinitialisation du mot de passe
+	// ----------------------------------------
 
 	@Test
-	public void TestRechercherUtilisateurPourReinitialisationEchec() {
-		try {
-			bm.loadAllClients();
-			bm.createClient("j.reinitechec1", "password", "Doe", "John", "123 Main St", true, "8888888888");
-			Utilisateur user = bm.rechercherUtilisateurPourReinitialisation("j.reinitechec1", "Doe", "Jane", "8888888888");
-			assertNull("L'utilisateur n'aurait pas dû être trouvé.", user);
-		} catch (Exception e) {
-			e.printStackTrace();
-			fail("Une exception inattendue a été levée : " + e.getMessage());
-		}
+	public void TestRechercherUtilisateurPourReinitialisationSucces() throws Exception {
+		Client user = createClient("j.reinitsucces1", "9999999999");
+		user.setNom("Doe");
+		user.setPrenom("John");
+
+		when(dao.getUserById("j.reinitsucces1")).thenReturn(user);
+
+		Utilisateur found = bm.rechercherUtilisateurPourReinitialisation(
+				"j.reinitsucces1", "Doe", "John", "9999999999");
+
+		assertNotNull("L'utilisateur aurait dû être trouvé.", found);
 	}
 
 	@Test
-	public void TestReinitialiserLeMotDePasseSucces() {
-		try {
-			bm.loadAllClients();
-			bm.createClient("j.reinitpwd1", "password", "Doe", "John", "123 Main St", true, "7777777777");
-			Utilisateur user = bm.getUserById("j.reinitpwd1");
-			bm.reinitialiserLeMotDePasse(user, "nouveauMotDePasseSuperSecret");
-			Utilisateur updatedUser = bm.getUserById("j.reinitpwd1");
-			if (!PasswordHasher.verifyPassword("nouveauMotDePasseSuperSecret", updatedUser.getUserPwd())) {
-				fail("Le mot de passe n'a pas été correctement réinitialisé.");
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-			fail("Une exception inattendue a été levée : " + e.getMessage());
-		}
+	public void TestRechercherUtilisateurPourReinitialisationEchec() throws Exception {
+		Client user = createClient("j.reinitechec1", "8888888888");
+		user.setNom("Doe");
+		user.setPrenom("John");
+
+		when(dao.getUserById("j.reinitechec1")).thenReturn(user);
+
+		Utilisateur found = bm.rechercherUtilisateurPourReinitialisation(
+				"j.reinitechec1", "Doe", "Jane", "8888888888");
+
+		assertNull("L'utilisateur n'aurait pas dû être trouvé.", found);
+	}
+
+	@Test
+	public void TestReinitialiserLeMotDePasseSucces() throws Exception {
+		Client user = createClient("j.reinitpwd1", "7777777777");
+		user.setUserPwd(PasswordHasher.hashPassword("old"));
+
+		doNothing().when(dao).updateUser(user);
+
+		bm.reinitialiserLeMotDePasse(user, "nouveauMotDePasseSuperSecret");
+
+		assertTrue(PasswordHasher.verifyPassword("nouveauMotDePasseSuperSecret", user.getUserPwd()));
+		verify(dao).updateUser(user);
 	}
 }

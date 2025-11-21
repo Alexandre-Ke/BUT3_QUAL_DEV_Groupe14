@@ -12,7 +12,7 @@ COPY src ./src
 COPY WebContent ./WebContent
 
 # 3) Builder le WAR (sans lancer les tests)
-RUN mvn -B -ntp clean package -DskipTests
+RUN mvn -B -ntp clean package
 
 # Étape 2 : image Tomcat avec JDK 17
 FROM tomcat:9.0-jdk17-temurin
