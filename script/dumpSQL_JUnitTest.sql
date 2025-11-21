@@ -72,16 +72,19 @@ CREATE TABLE IF NOT EXISTS `Utilisateur` (
 -- Dumping data for table `Utilisateur`
 --
 
-INSERT INTO `Utilisateur` (`userId`, `nom`, `prenom`, `adresse`, `userPwd`, `male`, `type`, `numClient`) VALUES
-('a.lidell1', 'Lidell', 'Alice', '789, grande rue, Metz', 'toto', b'1', 'CLIENT', '9865432100'),
-('admin', 'Smith', 'Joe', '123, grande rue, Metz', 'adminpass', b'1', 'MANAGER', ''),
-('c.exist', 'TEST NOM', 'TEST PRENOM', 'TEST ADRESSE', 'TEST PASS', b'1', 'CLIENT', '0101010101'),
-('g.descomptes', 'TEST NOM', 'TEST PRENOM', 'TEST ADRESSE', 'TEST PASS', b'1', 'CLIENT', '1000000001'),
-('g.descomptesvides', 'TEST NOM', 'TEST PRENOM', 'TEST ADRESSE', 'TEST PASS', b'1', 'CLIENT', '0000000002'),
-('g.exist', 'TEST NOM', 'TEST PRENOM', 'TEST ADRESSE', 'TEST PASS', b'1', 'CLIENT', '1010101010'),
-('g.pasdecompte', 'TEST NOM', 'TEST PRENOM', 'TEST ADRESSE', 'TEST PASS', b'1', 'CLIENT', '5544554455'),
-('j.doe1', 'Doe', 'Jane', '456, grand boulevard, Brest', 'toto', b'1', 'CLIENT', '1234567890'),
-('j.doe2', 'Doe', 'John', '457, grand boulevard, Perpignan', 'toto', b'1', 'CLIENT', '0000000001');
+INSERT INTO `Utilisateur`
+(`userId`, `nom`, `prenom`, `adresse`, `userPwd`, `male`, `type`, `numClient`)
+VALUES
+    ('a.lidell1', 'Lidell', 'Alice', '789, grande rue, Metz', SHA2('toto', 256), b'1', 'CLIENT', '9865432100'),
+    ('admin', 'Smith', 'Joe', '123, grande rue, Metz', SHA2('adminpass', 256), b'1', 'MANAGER', ''),
+    ('c.exist', 'TEST NOM', 'TEST PRENOM', 'TEST ADRESSE', SHA2('TEST PASS', 256), b'1', 'CLIENT', '0101010101'),
+    ('g.descomptes', 'TEST NOM', 'TEST PRENOM', 'TEST ADRESSE', SHA2('TEST PASS', 256), b'1', 'CLIENT', '1000000001'),
+    ('g.descomptesvides', 'TEST NOM', 'TEST PRENOM', 'TEST ADRESSE', SHA2('TEST PASS', 256), b'1', 'CLIENT', '0000000002'),
+    ('g.exist', 'TEST NOM', 'TEST PRENOM', 'TEST ADRESSE', SHA2('TEST PASS', 256), b'1', 'CLIENT', '1010101010'),
+    ('g.pasdecompte', 'TEST NOM', 'TEST PRENOM', 'TEST ADRESSE', SHA2('TEST PASS', 256), b'1', 'CLIENT', '5544554455'),
+    ('j.doe1', 'Doe', 'Jane', '456, grand boulevard, Brest', SHA2('toto', 256), b'1', 'CLIENT', '1234567890'),
+    ('j.doe2', 'Doe', 'John', '457, grand boulevard, Perpignan', SHA2('toto', 256), b'1', 'CLIENT', '0000000001');
+
 
 --
 -- Constraints for dumped tables

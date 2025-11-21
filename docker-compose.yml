@@ -1,0 +1,35 @@
+version: "3.9"
+
+services:
+  db:
+    image: mariadb:10.5
+    container_name: bank-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: bank_iut_2025
+      MYSQL_USER: appuser
+      MYSQL_PASSWORD: apppass
+    ports:
+      - "3307:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./script:/docker-entrypoint-initdb.d:ro
+    networks:
+      - bank-net
+
+  app:
+    build: .
+    container_name: bank-app
+    depends_on:
+      - db
+    ports:
+      - "8088:8080"
+    networks:
+      - bank-net
+
+networks:
+  bank-net:
+
+volumes:
+  db_data:

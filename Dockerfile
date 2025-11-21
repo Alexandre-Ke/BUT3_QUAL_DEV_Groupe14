@@ -21,6 +21,6 @@ FROM tomcat:9.0-jdk17-temurin
 COPY --from=build /app/target/*.war /usr/local/tomcat/webapps/ROOT.war
 
 # Tomcat écoute en interne sur 8080
-# EXPOSE 8080
+EXPOSE 8088
 
 CMD ["catalina.sh", "run"]

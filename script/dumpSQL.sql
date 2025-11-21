@@ -68,10 +68,10 @@ CREATE TABLE IF NOT EXISTS `Utilisateur` (
 --
 
 INSERT INTO `Utilisateur` (`userId`, `nom`, `prenom`, `adresse`, `userPwd`, `male`, `type`, `numClient`) VALUES
-('a', 'a', 'a', 'a', 'a', b'1', 'MANAGER', NULL),
-('admin', 'Smith', 'Joe', '123, grande rue, Metz', 'adminpass', b'1', 'MANAGER', ''),
-('client1', 'client1', 'Jane', '45, grand boulevard, Brest', 'clientpass1', b'1', 'CLIENT', '123456789'),
-('client2', 'client2', 'Jane', '45, grand boulevard, Brest', 'clientpass2', b'1', 'CLIENT', '123456788');
+('a', 'a', 'a', 'a', SHA2('a', 256), b'1', 'MANAGER', NULL),
+('admin', 'Smith', 'Joe', '123, grande rue, Metz', SHA2('adminpass', 256), b'1', 'MANAGER', ''),
+('client1', 'client1', 'Jane', '45, grand boulevard, Brest', SHA2('clientpass1', 256), b'1', 'CLIENT', '123456789'),
+('client2', 'client2', 'Jane', '45, grand boulevard, Brest', SHA2('clientpass2', 256), b'1', 'CLIENT', '123456788');
 
 --
 -- Constraints for dumped tables
