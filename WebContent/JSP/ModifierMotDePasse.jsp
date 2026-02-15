@@ -19,9 +19,9 @@
     <title>Modifier mon mot de passe</title>
 
     <link rel="stylesheet" href="${pageContext.request.contextPath}/style/style.css" />
-    <script src="/_00_ASBank2023/js/jquery.js"></script>
+    <script src="/_00_ASBank2025/js/jquery.js"></script>
     <!-- (optionnel) votre JS côté client pour validations locales -->
-    <script src="/_00_ASBank2023/js/jsChangePassword.js"></script>
+    <script src="/_00_ASBank2025/js/jsChangePassword.js"></script>
 </head>
 
 <body>

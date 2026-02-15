@@ -8,8 +8,8 @@
 <title>Formulaire de création d'un compte</title>
 	<link rel="stylesheet" href="${pageContext.request.contextPath}/style/style.css" />
 
-<script src="/_00_ASBank2023/js/jquery.js"></script>
-<script src="/_00_ASBank2023/js/jsCreerCompte.js"></script>
+<script src="/_00_ASBank2025/js/jquery.js"></script>
+<script src="/_00_ASBank2025/js/jsCreerCompte.js"></script>
 </head>
 
 <body>

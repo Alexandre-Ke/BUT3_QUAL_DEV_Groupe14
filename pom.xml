@@ -219,6 +219,13 @@
 			<version>4.2.6.RELEASE</version>
 			<scope>test</scope>
 		</dependency>
+		<!--Tests selenium (Pages UI)-->
+		<dependency>
+			<groupId>org.seleniumhq.selenium</groupId>
+			<artifactId>selenium-java</artifactId>
+			<version>4.18.1</version>
+			<scope>test</scope>
+		</dependency>
 
 		<!-- tes autres dépendances : Struts, MySQL, etc. (inchangées) -->
 		<dependency>
