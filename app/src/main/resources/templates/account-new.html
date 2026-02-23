@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Créer un compte - Banque</title>
+    <style>
+        body{font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height:100vh; padding:20px}
+        .container{background:#fff;padding:30px;border-radius:12px;max-width:600px;margin:0 auto;box-shadow:0 10px 30px rgba(0,0,0,0.1)}
+        label{display:block;margin-bottom:6px;font-weight:600}
+        input{width:100%;padding:10px;border:1px solid #ddd;border-radius:6px;margin-bottom:12px}
+        .btn{display:inline-block;padding:10px 16px;border-radius:6px;background:#667eea;color:#fff;text-decoration:none;border:none;cursor:pointer}
+        .alert{padding:12px;border-radius:6px;margin-bottom:12px}
+        .alert-error{background:#f8d7da;color:#721c24;border:1px solid #f5c6cb}
+        .alert-success{background:#d4edda;color:#155724;border:1px solid #c3e6cb}
+    </style>
+</head>
+<body>
+<div class="container">
+    <a href="/accounts" style="text-decoration:none;color:#6c757d;display:inline-block;margin-bottom:12px">← Retour aux comptes</a>
+
+    <h1>Créer un nouveau compte</h1>
+
+    <div th:if="${success}" class="alert alert-success">
+        <strong>✓</strong> <span th:text="${success}"></span>
+    </div>
+    <div th:if="${error}" class="alert alert-error">
+        <strong>✗</strong> <span th:text="${error}"></span>
+    </div>
+    <div th:if="${warning}" class="alert" style="background:#fff3cd;color:#856404;border:1px solid #ffeeba;margin-bottom:12px">
+        <strong>⚠</strong> <span th:text="${warning}"></span>
+    </div>
+
+    <form action="/accounts/new" method="post">
+        <label for="numeroCompte">Numéro de compte (ex: FR0123456789)</label>
+        <input type="text" id="numeroCompte" name="numeroCompte" required placeholder="FR0123456789">
+
+        <label for="clientUserId">Identifiant client (userId)</label>
+        <input type="text" id="clientUserId" name="clientUserId" required placeholder="ex: user1">
+
+        <label for="decouvert">Découvert autorisé (optionnel)</label>
+        <input type="number" step="0.01" id="decouvert" name="decouvertAutorise" placeholder="0.00">
+
+        <div style="margin-top:14px;display:flex;gap:10px">
+            <button class="btn" type="submit">Créer</button>
+            <a href="/accounts" class="btn" style="background:#6c757d">Annuler</a>
+        </div>
+    </form>
+</div>
+</body>
+</html>

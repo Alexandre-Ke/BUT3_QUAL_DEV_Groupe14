@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Inscription - Banque</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 720px;
+            margin: 0 auto;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            padding: 28px;
+        }
+        h1 { color: #222; margin-bottom: 8px; }
+        p.subtitle { color: #666; margin-bottom: 18px; }
+        .alert {
+            padding: 12px;
+            margin-bottom: 14px;
+            border-radius: 6px;
+            font-size: 14px;
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .group { margin-bottom: 14px; }
+        label { display: block; margin-bottom: 6px; font-weight: 600; color: #333; }
+        input, select {
+            width: 100%;
+            padding: 11px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        .actions { display: flex; gap: 10px; margin-top: 8px; }
+        .btn {
+            border: none;
+            border-radius: 6px;
+            padding: 10px 16px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 14px;
+        }
+        .btn-primary { background: #667eea; color: #fff; }
+        .btn-secondary { background: #6c757d; color: #fff; }
+        @media (max-width: 768px) {
+            .row { grid-template-columns: 1fr; }
+            .actions { flex-direction: column; }
+        }
+    </style>
+    <script>
+        function toggleNumeroClient() {
+            var type = document.getElementById('type').value;
+            var clientGroup = document.getElementById('numeroClientGroup');
+            if (type === 'GESTIONNAIRE') {
+                clientGroup.style.display = 'none';
+                document.getElementById('numeroClient').removeAttribute('required');
+            } else {
+                clientGroup.style.display = 'block';
+                document.getElementById('numeroClient').setAttribute('required', 'required');
+            }
+        }
+        document.addEventListener('DOMContentLoaded', toggleNumeroClient);
+    </script>
+</head>
+<body>
+<div class="container">
+    <h1 th:text="${allowManagerCreation} ? 'Créer un utilisateur' : 'Créer un compte client'">Créer un compte</h1>
+    <p class="subtitle"
+       th:text="${allowManagerCreation} ? 'Creation client ou gestionnaire' : 'Inscription nouveau client'">
+        Inscription d'un nouvel utilisateur
+    </p>
+
+    <div th:if="${error}" class="alert" th:text="${error}"></div>
+
+    <form method="post" action="/register">
+        <div class="row">
+            <div class="group" th:if="${allowManagerCreation}">
+                <label for="type">Type d'utilisateur</label>
+                <select id="type" name="type" onchange="toggleNumeroClient()">
+                    <option value="CLIENT" selected>Client</option>
+                    <option value="GESTIONNAIRE">Gestionnaire</option>
+                </select>
+            </div>
+            <input th:unless="${allowManagerCreation}" type="hidden" id="type" name="type" value="CLIENT">
+            <div class="group">
+                <label for="userId">Identifiant (userId)</label>
+                <input id="userId" name="userId" placeholder="ex: a.lidell1 (client)" required>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="group">
+                <label for="nom">Nom</label>
+                <input id="nom" name="nom" required>
+            </div>
+            <div class="group">
+                <label for="prenom">Prénom</label>
+                <input id="prenom" name="prenom" required>
+            </div>
+        </div>
+
+        <div class="group">
+            <label for="adresse">Adresse</label>
+            <input id="adresse" name="adresse" required>
+        </div>
+
+        <div class="row">
+            <div class="group">
+                <label for="homme">Sexe</label>
+                <select id="homme" name="homme">
+                    <option value="true" selected>Homme</option>
+                    <option value="false">Femme</option>
+                </select>
+            </div>
+            <div class="group" id="numeroClientGroup">
+                <label for="numeroClient">Numéro client (10 chiffres)</label>
+                <input id="numeroClient" name="numeroClient" pattern="[0-9]{10}" placeholder="1234567890">
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="group">
+                <label for="password">Mot de passe</label>
+                <input type="password" id="password" name="password" minlength="8" required>
+            </div>
+            <div class="group">
+                <label for="confirmPassword">Confirmer le mot de passe</label>
+                <input type="password" id="confirmPassword" name="confirmPassword" minlength="8" required>
+            </div>
+        </div>
+
+        <div class="actions">
+            <button class="btn btn-primary" type="submit">Créer le compte</button>
+            <a class="btn btn-secondary" th:href="${allowManagerCreation} ? '/accounts' : '/login'">Retour</a>
+        </div>
+    </form>
+</div>
+</body>
+</html>

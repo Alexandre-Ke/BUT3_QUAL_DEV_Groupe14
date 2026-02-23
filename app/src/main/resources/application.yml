@@ -1,0 +1,46 @@
+server:
+  port: 8080
+
+spring:
+  main:
+    banner-mode: "off"
+
+  thymeleaf:
+    mode: HTML
+    encoding: UTF-8
+    cache: false
+    check-template-location: true
+    prefix: classpath:/templates/
+    suffix: .html
+
+  datasource:
+    url: jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3307}/${DB_NAME:banque}?useUnicode=true&characterEncoding=utf8&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+    username: ${DB_USER:banque}
+    password: ${DB_PASSWORD:banque}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+        implicit-strategy: org.hibernate.boot.model.naming.ImplicitNamingStrategyJpaCompliantImpl
+    properties:
+      hibernate:
+        globally_quoted_identifiers: true
+
+logging:
+  level:
+    root: INFO
+    com.iut.banque: DEBUG
+    org.springframework.web: DEBUG
+    org.springframework: WARN
+    org.springframework.boot.autoconfigure: WARN
+    org.springframework.security: WARN
+    org.hibernate: WARN
+    org.hibernate.SQL: OFF
+    org.hibernate.orm.jdbc.bind: OFF
+    org.apache.catalina: WARN
+    org.apache.coyote: WARN
+    com.zaxxer.hikari: WARN

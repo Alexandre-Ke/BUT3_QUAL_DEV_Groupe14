@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Comptes - Banque</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+                'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+                sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 40px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #f0f0f0;
+            padding-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .header h1 {
+            color: #333;
+            font-size: 28px;
+            flex: 1;
+        }
+
+        .user-info {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .user-info p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .logout-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.3s;
+        }
+
+        .logout-btn:hover {
+            background: #c82333;
+        }
+
+        .alert {
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 6px;
+            font-weight: 500;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .actions {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .filter-panel {
+            background: #f8f9fa;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 20px;
+        }
+
+        .filter-form {
+            display: flex;
+            gap: 10px;
+            align-items: end;
+            flex-wrap: wrap;
+        }
+
+        .filter-form .field {
+            min-width: 260px;
+            flex: 1;
+        }
+
+        .filter-form label {
+            display: block;
+            font-size: 13px;
+            color: #555;
+            margin-bottom: 6px;
+            font-weight: 600;
+        }
+
+        .filter-form select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .selected-user {
+            margin-top: 12px;
+            padding: 12px;
+            border-radius: 6px;
+            background: #e7f3ff;
+            color: #24507a;
+            border: 1px solid #cfe5ff;
+            font-size: 14px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .accounts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .card {
+            background: #f8f9fa;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 20px;
+            transition: all 0.3s;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card:hover {
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .card h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 18px;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        .card-content {
+            flex: 1;
+        }
+
+        .card p {
+            color: #666;
+            margin: 10px 0;
+            font-size: 14px;
+        }
+
+        .balance {
+            font-size: 24px;
+            font-weight: bold;
+            color: #667eea;
+            margin: 15px 0;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 8px;
+            background: #e7f3ff;
+            color: #0066cc;
+            border-radius: 4px;
+            font-size: 12px;
+            margin-top: 5px;
+        }
+
+        .card-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+
+        .card-actions a,
+        .card-actions button {
+            flex: 1;
+            min-width: 80px;
+            padding: 8px 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+            transition: all 0.3s;
+            text-decoration: none;
+            text-align: center;
+        }
+
+        .btn-view {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-view:hover {
+            background: #5568d3;
+        }
+
+        .btn-deposit {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-deposit:hover {
+            background: #218838;
+        }
+
+        .btn-withdraw {
+            background: #ffc107;
+            color: #333;
+        }
+
+        .btn-withdraw:hover {
+            background: #e0a800;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+
+        .empty-state h2 {
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+
+            .header {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+
+            .header h1 {
+                flex: none;
+            }
+
+            .user-info {
+                flex-direction: column;
+                gap: 10px;
+                width: 100%;
+            }
+
+            .accounts-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .card-actions {
+                flex-direction: column;
+            }
+
+            .card-actions a,
+            .card-actions button {
+                width: 100%;
+                min-width: unset;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Mes Comptes</h1>
+            <div class="user-info">
+                <p th:text="'Connecté : ' + ${session.userName}"></p>
+                <form action="/logout" method="get" style="display: inline;">
+                    <button type="submit" class="logout-btn">Déconnexion</button>
+                </form>
+            </div>
+        </div>
+
+        <div th:if="${success}" class="alert alert-success">
+            <strong>✓ Succès !</strong> <span th:text="${success}"></span>
+        </div>
+
+        <div th:if="${error}" class="alert alert-error">
+            <strong>✗ Erreur !</strong> <span th:text="${error}"></span>
+        </div>
+        <div th:if="${warning}" class="alert" style="background:#fff3cd;color:#856404;border:1px solid #ffeeba;margin-bottom:12px">
+            <strong>⚠ Attention</strong> <span th:text="${warning}"></span>
+        </div>
+
+        <div class="actions">
+            <a href="/transfer" class="btn btn-primary">Effectuer un virement</a>
+            <a th:if="${session.userType != null and (#strings.containsIgnoreCase(session.userType, 'gestionnaire') or #strings.containsIgnoreCase(session.userType, 'manager'))}"
+               href="/accounts/new" class="btn btn-secondary">Créer un compte</a>
+            <a th:if="${session.userType != null and (#strings.containsIgnoreCase(session.userType, 'gestionnaire') or #strings.containsIgnoreCase(session.userType, 'manager'))}"
+               href="/register" class="btn btn-secondary">Créer un utilisateur</a>
+            <a href="/password" class="btn btn-secondary">Modifier mon mot de passe</a>
+        </div>
+
+        <div th:if="${isManager}" class="filter-panel">
+            <form action="/accounts" method="get" class="filter-form">
+                <div class="field">
+                    <label for="ownerUserId">Filtrer par utilisateur</label>
+                    <select id="ownerUserId" name="ownerUserId">
+                        <option value="">Tous les comptes</option>
+                        <option th:each="u : ${filterUsers}"
+                                th:value="${u.userId}"
+                                th:selected="${selectedOwnerUserId != null and selectedOwnerUserId == u.userId}"
+                                th:text="${u.userId + ' - ' + u.prenom + ' ' + u.nom}">
+                            user
+                        </option>
+                    </select>
+                </div>
+                <button class="btn btn-secondary" type="submit">Filtrer</button>
+                <a href="/accounts" class="btn btn-secondary">Réinitialiser</a>
+            </form>
+
+            <div th:if="${selectedFilterUser}" class="selected-user">
+                <strong>Utilisateur sélectionné :</strong>
+                <span th:text="${selectedFilterUser.prenom + ' ' + selectedFilterUser.nom}"></span>
+                <span th:text="${' (' + selectedFilterUser.userId + ')'}"></span>
+                <span th:text="${' - Adresse: ' + selectedFilterUser.adresse}"></span>
+            </div>
+        </div>
+
+        <div th:if="${#lists.isEmpty(accounts)}" class="empty-state">
+            <h2>Aucun compte</h2>
+            <p>Vous n'avez pas encore de compte. <a href="/accounts/new">Créez-en un maintenant</a></p>
+        </div>
+
+        <div th:unless="${#lists.isEmpty(accounts)}" class="accounts-grid">
+            <div th:each="compte : ${accounts}" class="card">
+                <h3 th:text="${compte.numeroCompte}">Compte 001</h3>
+                <div class="card-content">
+                    <p>
+                        <strong>Solde :</strong>
+                        <span class="balance" th:text="${#numbers.formatDecimal(compte.solde, 1, 2)} + ' €'">0.00 €</span>
+                    </p>
+                    <p th:if="${compte.className}" th:text="'Type : ' + ${compte.className}"></p>
+                    <p th:if="${compte.className == 'CompteSansDecouvert'}">
+                        <span class="badge">Sans découvert autorisé</span>
+                    </p>
+                    <p th:if="${compte.className == 'CompteAvecDecouvert'}">
+                        <span class="badge">Découvert autorisé</span>
+                    </p>
+                </div>
+                <div class="card-actions">
+                    <a th:href="@{/accounts/{id}(id=${compte.numeroCompte})}" class="btn-view">Détails</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
